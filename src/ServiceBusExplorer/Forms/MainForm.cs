@@ -4223,8 +4223,20 @@ namespace ServiceBusExplorer.Forms
                         {
                             try
                             {
+                                //******** Modified by edu1409 ********
+                                IEnumerable<EventHubDescription> eventHubs;
+                                
+                                try
+                                {
+                                    eventHubs = await serviceBusHelper.NamespaceManager.GetEventHubsAsync();
+                                }
+                                catch (UnauthorizedAccessException)
+                                {
+                                    var eh = new EventHubDescription(serviceBusHelper.EntityPath) { PartitionCount = serviceBusHelper.PartitionsCount };
+                                    eventHubs = new EventHubDescription[] { eh };
+                                }
+                                //*************************************
 
-                                var eventHubs = await serviceBusHelper.NamespaceManager.GetEventHubsAsync();
                                 Cursor.Current = Cursors.WaitCursor;
                                 eventHubListNode.Nodes.Clear();
                                 if (eventHubs != null)
@@ -4584,7 +4596,24 @@ namespace ServiceBusExplorer.Forms
         {
             try
             {
-                var partitions = GetPartitionsFromPartitionIds(eventHub);
+                //******** Modified by edu1409 ********
+                PartitionDescription[] partitions;
+
+                try
+                {
+                    partitions = GetPartitionsFromPartitionIds(eventHub).ToArray();
+                }
+                catch (NullReferenceException)
+                {
+                    partitions = new PartitionDescription[serviceBusHelper.PartitionsCount];
+
+                    for (int i = 0; i < serviceBusHelper.PartitionsCount; i++)
+                    {
+                        partitions[i] = new PartitionDescription(eventHub.Path, i.ToString());
+                    }
+                }
+                //*************************************
+
                 var partitionDescriptions = partitions as IList<PartitionDescription> ?? partitions.ToList();
                 WriteToLog(string.Format(PartitionsRetrievedFormat, eventHub.PartitionCount, eventHub.Path));
                 CreateEventHubConsumerGroups(eventHub, entityNode, partitionDescriptions);

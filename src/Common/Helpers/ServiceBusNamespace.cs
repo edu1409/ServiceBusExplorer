@@ -90,7 +90,11 @@ namespace ServiceBusExplorer.Helpers
         // Formats
         //***************************
         public const string SasConnectionStringFormat = "Endpoint={0};SharedAccessKeyName={1};SharedAccessKey={2};TransportType={3}";
-        public const string SasConnectionStringEntityPathFormat = "Endpoint={0};SharedAccessKeyName={1};SharedAccessKey={2};TransportType={3};EntityPath={4}";
+
+        //******** Modified by edu1409 ********
+        public const string SasConnectionStringEntityPathFormat = "Endpoint={0};SharedAccessKeyName={1};SharedAccessKey={2};TransportType={3};EntityPath={4};PartitionsCount={5}";
+        //*************************************
+
         #endregion
 
         #region Public Constructors
