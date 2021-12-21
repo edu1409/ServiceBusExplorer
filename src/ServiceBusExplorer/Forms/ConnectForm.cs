@@ -150,7 +150,9 @@ namespace ServiceBusExplorer.Forms
 
             foreach (var item in MainForm.SingletonMainForm.SelectedEntities)
             {
-                cboSelectedEntities.CheckBoxItems[item].Checked = true;
+                //******** Modified by edu1409 ********
+                if (item.Equals(Constants.EventHubEntities)) cboSelectedEntities.CheckBoxItems[item].Checked = true;
+                //**********************************
             }
         }
 
@@ -205,6 +207,10 @@ namespace ServiceBusExplorer.Forms
         {
             get { return cboSelectedEntities.CheckBoxItems.Where(i => i.Checked).Select(i => i.Text).ToList(); }
         }
+
+        //******** Added by edu1409 ********
+        public int PartitionsCount { get; private set; }
+        //**********************************
 
         #endregion
 
@@ -263,9 +269,13 @@ namespace ServiceBusExplorer.Forms
                 TransportType = (TransportType)cboTransportType.SelectedItem;
                 EntityPath = txtEntityPath.Text;
 
-
                 SharedAccessKeyName = txtIssuerName.Text;
                 SharedAccessKey = txtIssuerSecret.Text;
+
+                //******** Added by edu1409 ********
+                int.TryParse(txtPartitionsCount.Text, out int partitionsCount);
+                PartitionsCount = partitionsCount;
+                //**********************************
 
                 if (string.IsNullOrEmpty(EntityPath))
                 {
@@ -277,12 +287,15 @@ namespace ServiceBusExplorer.Forms
                 }
                 else
                 {
+                    //******** Modified by edu1409 ********
                     ConnectionString = string.Format(ServiceBusNamespace.SasConnectionStringEntityPathFormat,
                         Uri,
                         SharedAccessKeyName,
                         SharedAccessKey,
                         TransportType,
-                        EntityPath);
+                        EntityPath,
+                        PartitionsCount);
+                    //*************************************
                 }
             }
         }
@@ -371,6 +384,11 @@ namespace ServiceBusExplorer.Forms
             btnDelete.Visible = false;
             btnSave.Visible = cboServiceBusNamespace.Text == EnterConnectionString;
 
+            //******** Added by edu1409 ********
+            lblPartitionsCount.Visible = false;
+            txtPartitionsCount.Visible = false;
+            //**********************************
+
             var containsStsEndpoint = !string.IsNullOrWhiteSpace(Key) &&
                                       !string.IsNullOrWhiteSpace(serviceBusHelper.ServiceBusNamespaces[Key].StsEndpoint);
 
@@ -419,6 +437,17 @@ namespace ServiceBusExplorer.Forms
                     lblIssuerName.Text = SharedAccessKeyNameLabel;
                     lblIssuerSecret.Text = SharedAccessKeyLabel;
                 }
+
+                //******** Added by edu1409 ********
+                var partitionsCount = serviceBusHelper.GetPartitionsCount(ns);
+                
+                if (partitionsCount > 0)
+                {
+                    lblPartitionsCount.Visible = true;
+                    txtPartitionsCount.Visible = true;
+                    txtPartitionsCount.Text = partitionsCount.ToString();
+                }
+                //**********************************
             }
             cboTransportType.SelectedItem = ns.TransportType;
         }

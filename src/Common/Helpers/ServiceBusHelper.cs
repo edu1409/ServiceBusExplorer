@@ -261,6 +261,13 @@ namespace ServiceBusExplorer
 
         #region Public Instance Properties
 
+        //******** Added by edu1409 ********
+        public string EntityPath { get; private set; }
+
+        public int PartitionsCount { get; private set; }
+
+        //**********************************
+
         /// <summary>
         /// Gets a boolean that indicates if the current namespace is a cloud namespace.
         /// </summary>
@@ -666,6 +673,16 @@ namespace ServiceBusExplorer
 
         #region Public Methods
 
+        //******** Added by edu1409 ********
+        public int GetPartitionsCount(ServiceBusNamespace serviceBusNamespace)
+        {
+            var partitionCountParam = serviceBusNamespace.ConnectionString.Split(';').Where(p => p.Contains("PartitionsCount=")).FirstOrDefault()?.Split('=')[1];
+            _ = int.TryParse(partitionCountParam, out int partitionsCount);
+
+            return partitionsCount;
+        }
+        //**********************************
+
         /// <summary>
         /// Creates a new messaging factory object.
         /// </summary>
@@ -708,6 +725,11 @@ namespace ServiceBusExplorer
         public bool Connect(ServiceBusNamespace serviceBusNamespace)
         {
             this.serviceBusNamespaceInstance = serviceBusNamespace;
+
+            //******** Added by edu1409 ********
+            this.EntityPath = serviceBusNamespace.EntityPath;
+            this.PartitionsCount = GetPartitionsCount(serviceBusNamespace);
+            //**********************************
 
             if (string.IsNullOrWhiteSpace(serviceBusNamespace?.ConnectionString))
             {

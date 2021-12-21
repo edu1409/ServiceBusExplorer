@@ -172,7 +172,18 @@ namespace ServiceBusExplorer.Controls
             this.stopLog = stopLog;
             this.startLog = startLog;
             this.serviceBusHelper = serviceBusHelper;
-            eventHubDescription = serviceBusHelper.NamespaceManager.GetEventHub(consumerGroupDescription.EventHubPath);
+
+            //******** Modified by edu1409 ********
+            try
+            {
+                eventHubDescription = serviceBusHelper.NamespaceManager.GetEventHub(consumerGroupDescription.EventHubPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                eventHubDescription = new EventHubDescription(consumerGroupDescription.EventHubPath);
+            }
+            //*************************************
+
             eventHubClient = EventHubClient.CreateFromConnectionString(GetAmqpConnectionString(serviceBusHelper.ConnectionString),
                                                                                                consumerGroupDescription.EventHubPath);
             consumerGroup = string.Compare(consumerGroupDescription.Name,
